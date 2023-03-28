@@ -1,0 +1,47 @@
+import SwiftUI
+import WebKit
+
+struct ContentView: View {
+    
+    @State private var showWebView = false
+    var webView: WKWebView { // wrapped in computed property to avoid initialization before view is loaded
+        let webView = WKWebView()
+        webView.navigationDelegate = self
+        return webView
+    }
+    
+    var body: some View {
+        VStack {
+            if showWebView {
+                WebView(webView: webView)
+            } else {
+                Button("Sign in with Google") {
+                    showWebView = true
+                    let url = URL(string: "https://accounts.google.com")!
+                    webView.load(URLRequest(url: url))
+                }
+            }
+        }
+    }
+}
+
+struct WebView: UIViewRepresentable {
+    
+    var webView: WKWebView
+    
+    func makeUIView(context: Context) -> WKWebView {
+        return webView
+    }
+    
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        // Do nothing
+    }
+}
+
+extension ContentView: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        if let url = webView.url, url.absoluteString.starts(with: "https://accounts.google.com") {
+            UIApplication.shared.open(url, options: [:])
+        }
+    }
+}
